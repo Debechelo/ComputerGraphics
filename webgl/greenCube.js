@@ -10,14 +10,12 @@ void main() {
     float y_angle = 1.0;
 
     mat3 transform = mat3(
-        
         0, cos(x_angle),  sin(x_angle),
         0, -sin(x_angle), cos(x_angle),
         1, 0, 0
     ) * mat3(
         0, 1, 0,
         cos(y_angle), 0, sin(y_angle),
-        
         -sin(y_angle), 0, cos(y_angle)
     );
     gl_Position = vec4(vertexPosition * transform, 1.0);
@@ -94,14 +92,14 @@ function initShaderProgram(gl, vsSource, fsSource) {
 
 function initBuffer(gl) {
 
-    let p000 = [-0.5, -0.5, -0.5]
-    let p001 = [-0.5, -0.5, +0.5]
-    let p010 = [-0.5, +0.5, -0.5]
-    let p011 = [-0.5, +0.5, +0.5]
-    let p100 = [+0.5, -0.5, -0.5]
-    let p101 = [+0.5, -0.5, +0.5]
-    let p110 = [+0.5, +0.5, -0.5]
-    let p111 = [+0.5, +0.5, +0.5]
+    let p000 = [-0.5, -0.5, -0.5] //0
+    let p001 = [-0.5, -0.5, +0.5] //1
+    let p010 = [-0.5, +0.5, -0.5] //2
+    let p011 = [-0.5, +0.5, +0.5] //3
+    let p100 = [+0.5, -0.5, -0.5] //4
+    let p101 = [+0.5, -0.5, +0.5] //5
+    let p110 = [+0.5, +0.5, -0.5] //6
+    let p111 = [+0.5, +0.5, +0.5] //7
 
     const positions = [
             // Нижняя грань
@@ -158,6 +156,6 @@ function drawScene(gl, programInfo, buffers) {
     );
     gl.useProgram(programInfo.program);
 
-    gl.drawArrays(gl.TRIANGLES,0,buffers.bufferLength);
+    gl.drawArrays(gl.TRIANGLES,0,buffers.bufferLength/3);
 
 }

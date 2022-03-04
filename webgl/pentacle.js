@@ -113,6 +113,6 @@ function drawScene(gl, programInfo, buffers) {
     gl.enableVertexAttribArray(programInfo.attribLocations.vertexPosition);
 
     gl.useProgram(programInfo.program);
-    gl.drawArrays(gl.TRIANGLES,0,buffers.bufferLength);
+    gl.drawArrays(gl.TRIANGLES,0,buffers.bufferLength/2);
 
 }

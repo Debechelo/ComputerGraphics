@@ -12,7 +12,6 @@ void main() {
 `;
 
 const fsSource = `#version 300 es
-// WebGl требует явно установить точность флоатов, так что ставим 32 бита
 precision mediump float;
 
 out vec4 color;
@@ -126,5 +125,5 @@ function drawScene(gl, programInfo, buffers) {
     gl.vertexAttribPointer(programInfo.attribLocations.vertexPosition,2,gl.FLOAT,false,0,0);
     gl.enableVertexAttribArray(programInfo.attribLocations.vertexPosition);
     gl.useProgram(programInfo.program);
-    gl.drawArrays(gl.TRIANGLES,0,buffers.bufferLength);
+    gl.drawArrays(gl.TRIANGLES,0,buffers.bufferLength/2);
 }
