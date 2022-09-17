@@ -105,44 +105,50 @@ function initBuffers(gl) {
         // Front face
         -1.0, -1.0, 1.0,
         1.0, -1.0, 1.0,
-        1.0, 1.0, 1.0, -1.0, 1.0, 1.0,
+        1.0, 1.0, 1.0, 
+        -1.0, 1.0, 1.0,
         // Back face
-        -1.0, -1.0, -1.0, -1.0, 1.0, -1.0,
+        -1.0, -1.0, -1.0,
+         -1.0, 1.0, -1.0,
         1.0, 1.0, -1.0,
         1.0, -1.0, -1.0,
         // Top face
-        -1.0, 1.0, -1.0, -1.0, 1.0, 1.0,
+        -1.0, 1.0, -1.0, 
+        -1.0, 1.0, 1.0,
         1.0, 1.0, 1.0,
         1.0, 1.0, -1.0,
         // Bottom face
         -1.0, -1.0, -1.0,
         1.0, -1.0, -1.0,
-        1.0, -1.0, 1.0, -1.0, -1.0, 1.0,
+        1.0, -1.0, 1.0, 
+        -1.0, -1.0, 1.0,
         // Right face
         1.0, -1.0, -1.0,
         1.0, 1.0, -1.0,
         1.0, 1.0, 1.0,
         1.0, -1.0, 1.0,
         // Left face
-        -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, -1.0,
+        -1.0, -1.0, -1.0,
+         -1.0, -1.0, 1.0, 
+         -1.0, 1.0, 1.0, 
+         -1.0, 1.0, -1.0,
     ]
 
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW)
 
     const faceColors = [
-        [1, 0.5, 0.5, 1.0], // Front face: white
-        [1, 0.5, 0.5, 1.0], // Back face: red
-        [0.5, 0.7, 1, 1.0], // Top face: green
-        [0.5, 0.7, 1, 1.0], // Bottom face: blue
-        [0.3, 1, 0.3, 1.0], // Right face: yellow
-        [0.3, 1, 0.3, 1.0], // Left face: purple
+        [1.0, 0.5, 0.5, 1.0], // Front face: white
+        [0.5, 0.7, 1, 1.0],
+        [0.3, 1, 0.3, 1.0],
+        [0.8, 0.9, 0.0, 1.0],
     ]
 
     var colors = []
-    for (var j = 0; j < faceColors.length; ++j) {
+    for (var j = 0; j < faceColors.length; j++) {
         const c = faceColors[j]
-
-        colors = colors.concat(c, c, c, c)
+        for (var i = 0; i < 24; i++) {
+            colors = colors.concat(c)
+        }
     }
 
     const colorBuffer = gl.createBuffer()
@@ -178,17 +184,9 @@ function drawScene(gl, programInfo, buffers, deltaTime) {
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-    const fieldOfView = 45 * Math.PI / 180 // in radians
-    const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight
-    const zNear = 0.01
-    const zFar = 100.0
-    const projectionMatrix = mat4.create()
 
-    mat4.perspective(projectionMatrix,
-        fieldOfView,
-        aspect,
-        zNear,
-        zFar)
+    const projectionMatrix = mat4.create()
+    mat4.perspective(projectionMatrix, 45 * Math.PI / 180, gl.canvas.clientWidth / gl.canvas.clientHeight, 0.01,100.0)
 
     gl.uniformMatrix4fv(programInfo.uniformLocations.projectionMatrix, false, projectionMatrix)
 
@@ -197,7 +195,6 @@ function drawScene(gl, programInfo, buffers, deltaTime) {
 
     mat4.translate(modelViewMatrix, modelViewMatrix, [0.0, 0.0, -20.0])
     mat4.rotate(modelViewMatrix, modelViewMatrix, 0.2, [1, -1, 0])
-    mat4.rotate(modelViewMatrix, modelViewMatrix, -rotations[5], [0, -1, 0])
     gl.uniformMatrix4fv(programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix)
 
     const modelMatrix = mat4.create()
@@ -205,6 +202,7 @@ function drawScene(gl, programInfo, buffers, deltaTime) {
 
     mat4.identity(modelMatrix);
 
+    mat4.rotate(modelMatrix, modelMatrix, rotations[5], [0, 1, 0])
     mat4.translate(modelMatrix, modelMatrix, [-10.0, 0.0, 0.0])
     mat4.rotate(modelMatrix, modelMatrix, rotations[4], [0, 1, 0])
     mat4.translate(modelMatrix, modelMatrix, [-2.3, 0.0, 0.0])
@@ -228,10 +226,15 @@ function drawScene(gl, programInfo, buffers, deltaTime) {
 
     mat4.identity(modelMatrix);
 
+    mat4.rotate(modelMatrix, modelMatrix, rotations[5], [0, 1, 0])
     mat4.translate(modelMatrix, modelMatrix, [-10.0, 0.0, 0.0])
     mat4.rotate(modelMatrix, modelMatrix, rotations[4], [0, 1, 0])
-    mat4.rotate(modelMatrix, modelMatrix, (Math.PI / 2) + rotations[1], [0, 1, 0])
+    mat4.rotate(modelMatrix, modelMatrix, rotations[1], [0, 1, 0])
+
     gl.uniformMatrix4fv(programInfo.uniformLocations.modelMatrix, false, modelMatrix)
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.color)
+    gl.vertexAttribPointer(programInfo.attribLocations.vertexColor, 4, gl.FLOAT, false, 0, 384)
 
     gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0)
 
@@ -239,26 +242,33 @@ function drawScene(gl, programInfo, buffers, deltaTime) {
 
     mat4.identity(modelMatrix);
 
+    mat4.rotate(modelMatrix, modelMatrix, rotations[5], [0, 1, 0])
     mat4.translate(modelMatrix, modelMatrix, [-10.0, 0.0, 0.0])
     mat4.rotate(modelMatrix, modelMatrix, rotations[4], [0, 1, 0])
     mat4.translate(modelMatrix, modelMatrix, [2.3, 0.0, 0.0])
-    mat4.rotate(modelMatrix, modelMatrix, Math.PI / 2, [0, 0, 1])
-    mat4.rotate(modelMatrix, modelMatrix, rotations[2], [1, 0, 0])
+    mat4.rotate(modelMatrix, modelMatrix, rotations[2], [0, 1, 0])
 
     gl.uniformMatrix4fv(programInfo.uniformLocations.modelMatrix, false, modelMatrix)
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.color)
+    gl.vertexAttribPointer(programInfo.attribLocations.vertexColor, 4, gl.FLOAT, false, 0, 768)
+
     gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0)
 
     // //----------------------------------------------------- 4 квадрат
 
     mat4.identity(modelMatrix);
 
+    mat4.rotate(modelMatrix, modelMatrix, rotations[5], [0, 1, 0])
     mat4.translate(modelMatrix, modelMatrix, [-10.0, 0.0, 0.0])
     mat4.rotate(modelMatrix, modelMatrix, rotations[4], [0, 1, 0])
     mat4.translate(modelMatrix, modelMatrix, [0.0, 2.0, 0.0])
-    mat4.rotate(modelMatrix, modelMatrix, Math.PI / 2, [0, 0, 1])
-    mat4.rotate(modelMatrix, modelMatrix, rotations[3], [1, 0, 0])
+    mat4.rotate(modelMatrix, modelMatrix, rotations[3], [0, 1, 0])
 
     gl.uniformMatrix4fv(programInfo.uniformLocations.modelMatrix, false, modelMatrix)
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.color)
+    gl.vertexAttribPointer(programInfo.attribLocations.vertexColor, 4, gl.FLOAT, false, 0, 1152)
 
     gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0)
 
